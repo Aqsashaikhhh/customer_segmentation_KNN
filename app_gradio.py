@@ -1,7 +1,6 @@
 import pickle
 import numpy as np
 import gradio as gr
-import os
 
 
 def load_model():
@@ -28,8 +27,6 @@ encoding_map = {
 def predict_gradio(blood_glucose, insulin, bmi, age, bp, chol, waist,
                    glucose_test, pancreas, liver,
                    family, gene, activity, diet, smoking, alcohol, early):
-    """Return HTML with predicted diabetes type, confidence and top-3 alternatives."""
-    # Build input array in the same order used by the training pipeline
     input_data = np.array([[
         blood_glucose, insulin, bmi, age, bp, chol, waist,
         encoding_map[family], encoding_map[gene], encoding_map[activity],
@@ -37,41 +34,33 @@ def predict_gradio(blood_glucose, insulin, bmi, age, bp, chol, waist,
         glucose_test, pancreas, liver, encoding_map[early]
     ]])
 
-    try:
-        input_scaled = scaler.transform(input_data)
-        probs = model.predict_proba(input_scaled)[0]
-        pred = model.predict(input_scaled)[0]
+    input_scaled = scaler.transform(input_data)
+    probs = model.predict_proba(input_scaled)[0]
+    pred = model.predict(input_scaled)[0]
 
-        # Confidence for predicted class
-        class_idx = np.where(model.classes_ == pred)[0][0]
-        confidence = probs[class_idx] * 100
+    class_idx = np.where(model.classes_ == pred)[0][0]
+    confidence = probs[class_idx] * 100
 
-        # Top 3 alternatives
-        top_idx = np.argsort(probs)[-3:][::-1]
+    top_idx = np.argsort(probs)[-3:][::-1]
 
-        # Build HTML output
-        color = "black"
-        if confidence > 70:
-            color = "green"
-        elif confidence > 50:
-            color = "orange"
+    color = "black"
+    if confidence > 70:
+        color = "green"
+    elif confidence > 50:
+        color = "orange"
 
-        html = f"<h2 style='color:{color}'>Prediction: {pred}</h2>"
-        html += f"<p><strong>Confidence:</strong> {confidence:.1f}%</p>"
-        html += "<h4>Top 3 possibilities</h4><ol>"
-        for idx in top_idx:
-            html += f"<li>{model.classes_[idx]} — {probs[idx]*100:.1f}%</li>"
-        html += "</ol>"
-        html += "<hr><p><em>Disclaimer:</em> This tool is for educational purposes only. Consult a medical professional for diagnosis.</p>"
+    html = f"<h2 style='color:{color}'>Prediction: {pred}</h2>"
+    html += f"<p><strong>Confidence:</strong> {confidence:.1f}%</p>"
+    html += "<h4>Top 3 possibilities</h4><ol>"
+    for idx in top_idx:
+        html += f"<li>{model.classes_[idx]} — {probs[idx]*100:.1f}%</li>"
+    html += "</ol>"
+    html += "<hr><p><em>Disclaimer:</em> This tool is for educational purposes only. Consult a medical professional for diagnosis.</p>"
 
-        return html
-
-    except Exception as e:
-        return f"<p style='color:red;'>Prediction error: {e}</p>"
+    return html
 
 
 def create_interface():
-    # Numeric inputs
     with gr.Blocks() as demo:
         gr.Markdown("# 🩺 Diabetes Type Prediction (Gradio)")
         with gr.Row():
@@ -99,7 +88,6 @@ def create_interface():
         predict_btn = gr.Button("🔍 Predict")
         output = gr.HTML()
 
-        # Hook up the button
         predict_btn.click(fn=predict_gradio,
                           inputs=[blood_glucose, insulin, bmi, age, bp, chol, waist,
                                   glucose_test, pancreas, liver,
