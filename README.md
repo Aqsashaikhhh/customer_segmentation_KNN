@@ -95,6 +95,33 @@ ls *.pkl
 # Should show: randomforest.pkl, scaler.pkl
 ```
 
+### Model files & storage
+
+The trained model (`randomforest.pkl`) is a large binary (≈80MB). Storing large binaries directly in the git history can bloat the repository and slow clones. Choose one of the options below:
+
+- Option A (recommended): Host the model outside the repo (GitHub Release, cloud storage) and download it when needed:
+
+```bash
+# example: download to project root
+curl -L -o randomforest.pkl "<model-download-url>"
+curl -L -o scaler.pkl "<scaler-download-url>"
+```
+
+- Option B: Use Git Large File Storage (Git LFS) to keep model files in the repo without bloating history:
+
+```bash
+# macOS example
+brew install git-lfs
+git lfs install
+git lfs track "*.pkl"
+git add .gitattributes
+git rm --cached randomforest.pkl scaler.pkl
+git add randomforest.pkl scaler.pkl
+git commit -m "Move model files to Git LFS"
+git push origin main
+```
+
+Option A is the safest if you want to avoid rewriting repo history. Option B is convenient when you want the model to remain part of the repo but tracked via LFS.
 ## 💻 Usage
 
 ### Running the Web Application
@@ -159,6 +186,8 @@ diabitesss/myenv/
 └── requirements.txt            # Python dependencies
 ```
 
+Note: To keep this repository lightweight, large model binaries such as `randomforest.pkl` may be hosted externally (GitHub Releases, S3, Google Drive) or managed via Git LFS. See "Model files & storage" above for recommended practices.
+
 ## 🧠 Model Details
 
 ### Algorithm: Random Forest Classifier
@@ -199,6 +228,7 @@ The model uses all 17 features with varying importance:
 2. **Class Imbalance**: Some diabetes types may have fewer samples
 3. **Feature Encoding**: Manual encoding required for categorical features
 4. **Medical Disclaimer**: This is a prediction tool for educational purposes only
+5. **Large model files**: `randomforest.pkl` is ~80MB — consider hosting the file externally or using Git LFS. See the "Model files & storage" section for details.
 
 ## 🔮 Future Improvements
 
