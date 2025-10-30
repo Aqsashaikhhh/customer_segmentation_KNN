@@ -1,3 +1,14 @@
+---
+title: Diabetes Prediction App
+emoji: 🩸
+colorFrom: red
+colorTo: pink
+sdk: gradio
+sdk_version: 5.0.0
+app_file: app.py
+pinned: false
+---
+
 # 🩺 Diabetes Type Prediction System
 
 A machine learning-powered web application that predicts diabetes types using Random Forest classification. The system can identify 13 different diabetes types with 85% accuracy.
